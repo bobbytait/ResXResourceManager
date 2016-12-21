@@ -25,12 +25,12 @@
         [NotNull]
         private readonly ICompositionHost _compositionHost = new CompositionHost();
 
-#if DEBUG
-        public App()
-        {
-            System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("de-DE");
-        }
-#endif
+//#if DEBUG
+//        public App()
+//        {
+//            System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("de-DE");
+//        }
+//#endif
 
         protected override void OnStartup(StartupEventArgs e)
         {
