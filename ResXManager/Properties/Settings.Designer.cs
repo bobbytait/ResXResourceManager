@@ -37,18 +37,6 @@ namespace tomenglertde.ResXManager.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1000,800")]
-        public global::System.Windows.Size StartupSize {
-            get {
-                return ((global::System.Windows.Size)(this["StartupSize"]));
-            }
-            set {
-                this["StartupSize"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("50,50")]
         public global::System.Windows.Vector StartupLocation {
             get {
@@ -56,6 +44,18 @@ namespace tomenglertde.ResXManager.Properties {
             }
             set {
                 this["StartupLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1200,1024")]
+        public global::System.Windows.Size StartupSize {
+            get {
+                return ((global::System.Windows.Size)(this["StartupSize"]));
+            }
+            set {
+                this["StartupSize"] = value;
             }
         }
     }
