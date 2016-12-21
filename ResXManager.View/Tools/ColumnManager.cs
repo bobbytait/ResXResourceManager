@@ -79,19 +79,18 @@
             foreach (var cultureKey in addedcultureKeys)
             {
                 Contract.Assume(cultureKey != null);
-                dataGrid.AddLanguageColumn(resourceManager, configuration, cultureKey);
+                dataGrid.AddLanguageColumn(configuration, cultureKey);
             }
         }
 
-        public static void CreateNewLanguageColumn([NotNull] this DataGrid dataGrid, [NotNull] ResourceManager resourceManager, [NotNull] Configuration configuration, CultureInfo culture)
+        public static void CreateNewLanguageColumn([NotNull] this DataGrid dataGrid, [NotNull] Configuration configuration, CultureInfo culture)
         {
             Contract.Requires(dataGrid != null);
-            Contract.Requires(resourceManager != null);
             Contract.Requires(configuration != null);
 
             var cultureKey = new CultureKey(culture);
 
-            dataGrid.AddLanguageColumn(resourceManager, configuration, cultureKey);
+            dataGrid.AddLanguageColumn(configuration, cultureKey);
 
             var key = cultureKey.ToString(NeutralCultureKeyString);
 
@@ -244,10 +243,9 @@
             return column;
         }
 
-        private static void AddLanguageColumn([NotNull] this DataGrid dataGrid, [NotNull] ResourceManager resourceManager, [NotNull] Configuration configuration, [NotNull] CultureKey cultureKey)
+        private static void AddLanguageColumn([NotNull] this DataGrid dataGrid, [NotNull] Configuration configuration, [NotNull] CultureKey cultureKey)
         {
             Contract.Requires(dataGrid != null);
-            Contract.Requires(resourceManager != null);
             Contract.Requires(configuration != null);
             Contract.Requires(cultureKey != null);
 
@@ -258,7 +256,7 @@
             var culture = cultureKey.Culture;
             var languageBinding = culture != null
                 ? new Binding { Source = culture }
-                : new Binding("Configuration.NeutralResourcesLanguage") { Source = resourceManager };
+                : new Binding("NeutralResourcesLanguage") { Source = configuration };
 
             languageBinding.Converter = CultureToXmlLanguageConverter.Default;
             // It's important to explicitly set the converter culture here, else we will get a binding error, because here the source for the converter culture is the target of the binding.
@@ -266,7 +264,7 @@
 
             var flowDirectionBinding = culture != null
                 ? new Binding("TextInfo.IsRightToLeft") { Source = culture }
-                : new Binding("Configuration.NeutralResourcesLanguage.TextInfo.IsRightToLeft") { Source = resourceManager };
+                : new Binding("NeutralResourcesLanguage.TextInfo.IsRightToLeft") { Source = configuration };
 
             flowDirectionBinding.Converter = IsRightToLeftToFlowDirectionConverter.Default;
 

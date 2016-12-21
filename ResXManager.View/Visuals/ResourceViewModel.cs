@@ -33,6 +33,7 @@
     [VisualCompositionExport(RegionId.Content, Sequence = 1)]
     public class ResourceViewModel : ObservableObject
     {
+        [NotNull]
         private readonly DispatcherThrottle _resourceTableEntiyCountUpdateThrottle;
         [NotNull]
         private readonly ResourceManager _resourceManager;
@@ -44,12 +45,13 @@
         private readonly ITracer _tracer;
         [NotNull]
         private readonly CodeReferenceTracker _codeReferenceTracker;
+        [NotNull]
         private readonly DispatcherThrottle _restartFindCodeReferencesThrottle;
-        [NotNull]
+        [NotNull, ItemNotNull]
         private readonly ObservableCollection<ResourceEntity> _selectedEntities = new ObservableCollection<ResourceEntity>();
-        [NotNull]
+        [NotNull, ItemNotNull]
         private readonly IObservableCollection<ResourceTableEntry> _resourceTableEntries;
-        [NotNull]
+        [NotNull, ItemNotNull]
         private readonly ObservableCollection<ResourceTableEntry> _selectedTableEntries = new ObservableCollection<ResourceTableEntry>();
         [NotNull]
         private readonly PerformanceTracer _performanceTracer;
@@ -193,7 +195,7 @@
         public ICommand ToggleInvariantCommand => new DelegateCommand(() => _selectedTableEntries.Any(), ToggleInvariant);
 
         [NotNull]
-        public ICommand ReloadCommand => new DelegateCommand(Reload);
+        public ICommand ReloadCommand => new DelegateCommand(() => Reload(true));
 
         [NotNull]
         public ICommand SaveCommand => new DelegateCommand(() => _resourceManager.HasChanges, () => _resourceManager.Save(_configuration.EffectiveResXSortingComparison));
@@ -436,16 +438,31 @@
 
         public void Reload()
         {
-            var sourceFiles = _sourceFilesProvider.SourceFiles;
+            Reload(false);
+        }
 
-            _codeReferenceTracker.StopFind();
-
-            using (_performanceTracer.Start("ResourceManager.Load"))
+        public void Reload(bool forceFindCodeReferences)
+        {
+            try
             {
-                _resourceManager.Reload(sourceFiles, _configuration.DuplicateKeyHandling);
-            }
+                using (_performanceTracer.Start("ResourceManager.Load"))
+                {
+                    var sourceFiles = _sourceFilesProvider.SourceFiles;
 
-            BeginFindCodeReferences(sourceFiles);
+                    _codeReferenceTracker.StopFind();
+
+                    if (_resourceManager.Reload(sourceFiles, _configuration.DuplicateKeyHandling) || forceFindCodeReferences)
+                    {
+                        _restartFindCodeReferencesThrottle.Tick();
+                    }
+
+                    _configuration.Reload();
+                }
+            }
+            catch (Exception ex)
+            {
+                _tracer.TraceError(ex.ToString());
+            }
         }
 
         private void BeginFindCodeReferences()
@@ -512,6 +529,8 @@
             Contract.Invariant(_resourceTableEntries != null);
             Contract.Invariant(_selectedTableEntries != null);
             Contract.Invariant(_performanceTracer != null);
+            Contract.Invariant(_restartFindCodeReferencesThrottle != null);
+            Contract.Invariant(_resourceTableEntiyCountUpdateThrottle != null);
         }
     }
 }
