@@ -279,22 +279,47 @@
           </Button>
           <Separator />
           <Menu VerticalAlignment="Center" Style="{DynamicResource {x:Static styles:ResourceKeys.MenuStyle}}">
-            <MenuItem Padding="2" Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}" HeaderTemplate="{DynamicResource {x:Static themes:ResourceKeys.MenuItemDropDownDataTemplate}}">
-              <MenuItem.Header>
-                <Image SnapsToDevicePixels="True" Source="/ResXManager.View;component/Assets/excel.png" />
-              </MenuItem.Header>
-              <MenuItem Header="{x:Static properties:Resources.ExportExcelAll}"
-                        Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}"
-                        Command="{Binding ExportExcelCommand, Converter={StaticResource ExportExcelCommandConverter}}" />
-              <MenuItem Header="{x:Static properties:Resources.ExportExcelSelection}"
-                        Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}"
-                        Command="{Binding ExportExcelCommand, Converter={StaticResource ExportExcelCommandConverter}}"
-                        CommandParameter="{Binding ElementName=DataGrid, Converter={x:Static converters:DataGridToSelectionScopeConverter.Default}}" />
-              <MenuItem Header="{x:Static properties:Resources.ImportExcel}"
-                        Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}"
-                        Command="{Binding ImportExcelCommand, Converter={StaticResource ImportExcelCommandConverter}}" />
-            </MenuItem>
-            <MenuItem Padding="2" Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}" HeaderTemplate="{DynamicResource {x:Static themes:ResourceKeys.MenuItemDropDownDataTemplate}}">
+
+                        <MenuItem
+                            Padding="2"
+                            Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}"
+                            HeaderTemplate="{DynamicResource {x:Static themes:ResourceKeys.MenuItemDropDownDataTemplate}}">
+                            <MenuItem.Header>
+                                <Image
+                                    SnapsToDevicePixels="True"
+                                    Source="/ResXManager.View;component/Assets/excel.png" />
+                            </MenuItem.Header>
+
+                            <MenuItem
+                                Header="{x:Static properties:Resources.MepImportExcel}"
+                                Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}"
+                                Command="{Binding MepImportExcelCommand}" />
+                            <!--, Converter={StaticResource ExportExcelCommandConverter}}" />-->
+
+                            <MenuItem
+                                Header="{x:Static properties:Resources.MepExportExcelAll}"
+                                Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}"
+                                Command="{Binding MepExportExcelCommand}" />
+                            <!--, Converter={StaticResource ExportExcelCommandConverter}}" />-->
+
+                            <MenuItem
+                                Header="{x:Static properties:Resources.ExportExcelAll}"
+                                Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}"
+                                Command="{Binding ExportExcelCommand, Converter={StaticResource ExportExcelCommandConverter}}" />
+
+                            <MenuItem
+                                Header="{x:Static properties:Resources.ExportExcelSelection}"
+                                Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}"
+                                Command="{Binding ExportExcelCommand, Converter={StaticResource ExportExcelCommandConverter}}"
+                                CommandParameter="{Binding ElementName=DataGrid, Converter={x:Static converters:DataGridToSelectionScopeConverter.Default}}" />
+
+                            <MenuItem
+                                Header="{x:Static properties:Resources.ImportExcel}"
+                                Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}"
+                                Command="{Binding ImportExcelCommand, Converter={StaticResource ImportExcelCommandConverter}}" />
+                        </MenuItem>
+
+                        <MenuItem Padding="2" Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}" HeaderTemplate="{DynamicResource {x:Static themes:ResourceKeys.MenuItemDropDownDataTemplate}}">
               <MenuItem.Header>
                 <Image SnapsToDevicePixels="True" Source="/ResXManager.View;component/Assets/snapshot.png">
                   <Image.Style>
@@ -501,7 +526,7 @@
 
             <DataGrid.ItemsPanel>
               <ItemsPanelTemplate>
-                <VirtualizingStackPanel DataContext="{Binding ElementName=DataGrid}" 
+                <VirtualizingStackPanel DataContext="{Binding ElementName=DataGrid}"
                                         TextElement.FontSize="{Binding Path=(view:Appearance.TextFontSize), RelativeSource={RelativeSource Self}}">
                   <VirtualizingStackPanel.ContextMenu>
                     <ContextMenu Style="{DynamicResource {x:Static styles:ResourceKeys.CompositeContextMenuStyle}}">

@@ -110,6 +110,24 @@ namespace tomenglertde.ResXManager.View.Properties {
             }
         }
 
+        public static string MepImportExcel
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<string>() != null);
+                return ResourceManager.GetString("MepImportExcel", resourceCulture) ?? string.Empty;
+            }
+        }
+
+        public static string MepExportExcelAll
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<string>() != null);
+                return ResourceManager.GetString("MepExportExcelAll", resourceCulture) ?? string.Empty;
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Create all resource files when adding a new resour....
         /// </summary>
