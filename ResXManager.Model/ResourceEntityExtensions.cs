@@ -15,6 +15,7 @@
     {
         private const string KeyColumnHeader = @"Key";
         private const string CommentHeaderPrefix = "Comment";
+        private const string ExcelCarriageReturn = "_x000D_";
 
         private static readonly string[] _fixedColumnHeaders = { KeyColumnHeader };
 
@@ -261,7 +262,7 @@
                     {
                         mapping.Key,
                         Entry = entity.Entries.SingleOrDefault(e => e.Key == mapping.Key) ?? entity.Add(mapping.Key),
-                        Text = column,
+                        Text = FixExcelCarriageReturn(column),
                         Culture = dataColumnHeaders[index].ExtractCulture(),
                         ColumnKind = dataColumnHeaders[index].GetColumnKind()
                     }))
@@ -276,6 +277,13 @@
             VerifyCultures(entity, changes.Select(c => c.Culture).Distinct());
 
             return changes;
+        }
+
+        private static string FixExcelCarriageReturn(string sourceString)
+        {
+            return ((sourceString != null) && (sourceString.Contains(ExcelCarriageReturn))) ?
+                sourceString.Replace(ExcelCarriageReturn, "\r") :
+                sourceString;
         }
 
         [NotNull]
