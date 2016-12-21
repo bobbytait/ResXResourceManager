@@ -430,10 +430,7 @@
             Contract.Requires(param != null);
             Contract.Requires(param.FileName != null);
 
-            MessageBox.Show("MepExportExcel");
-
-
-            //_resourceManager.ExportExcelFile(param.FileName, param.Scope, _configuration.ExcelExportMode);
+            _resourceManager.ExportExcelFile(param.FileName, param.Scope, ExcelExportMode.MEPSingleSheet);
         }
 
         private void MepImportExcel([NotNull] string fileName)

@@ -133,6 +133,16 @@
 
         private void ExportExcelCommandConverter_Executing(object sender, [NotNull] ConfirmedCommandEventArgs e)
         {
+            ExportExcelCommandConverter(DateTime.Today.ToString("yyyy_MM_dd", CultureInfo.InvariantCulture), e);
+        }
+
+        private void MepExportExcelCommandConverter_Executing(object sender, [NotNull] ConfirmedCommandEventArgs e)
+        {
+            ExportExcelCommandConverter("TFL-Translations-RRM-Export-" + DateTime.Today.ToString("yyyyMMdd", CultureInfo.InvariantCulture), e);
+        }
+
+        private void ExportExcelCommandConverter(string filename, [NotNull] ConfirmedCommandEventArgs e)
+        {
             var dlg = new SaveFileDialog
             {
                 AddExtension = true,
@@ -140,7 +150,7 @@
                 DefaultExt = ".xlsx",
                 Filter = "Excel Worksheets|*.xlsx|All Files|*.*",
                 FilterIndex = 0,
-                FileName = DateTime.Today.ToString("yyyy_MM_dd", CultureInfo.InvariantCulture)
+                FileName = filename
             };
 
             if (!dlg.ShowDialog().GetValueOrDefault())

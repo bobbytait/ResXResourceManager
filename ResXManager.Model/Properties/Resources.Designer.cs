@@ -130,6 +130,15 @@ namespace tomenglertde.ResXManager.Model.Properties {
             }
         }
 
+        public static string ExcelExport_MEPSingleSheet
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<string>() != null);
+                return ResourceManager.GetString("ExcelExport_MEPSingleSheet", resourceCulture) ?? string.Empty;
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Error saving file '{0}':&amp;#13;&amp;#10;{1}&amp;....
         /// </summary>
@@ -325,6 +334,7 @@ namespace tomenglertde.ResXManager.Model.Properties {
         ///   Looks up a localized string similar to Single sheet.
         /// </summary>
         ExcelExport_SingleSheet,
+        ExcelExport_MEPSingleSheet,
         /// <summary>
         ///   Looks up a localized string similar to Error saving file '{0}':&amp;#13;&amp;#10;{1}&amp;....
         /// </summary>

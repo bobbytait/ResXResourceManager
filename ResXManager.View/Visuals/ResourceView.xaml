@@ -36,7 +36,11 @@
     <toms:ConfirmedCommandConverter x:Key="CutCommandConverter" Executing="CutCommandConverter_Executing" />
     <toms:ConfirmedCommandConverter x:Key="ImportExcelCommandConverter" Executing="ImportExcelCommandConverter_Executing" Error="CommandConverter_Error" />
     <toms:ConfirmedCommandConverter x:Key="ExportExcelCommandConverter" Executing="ExportExcelCommandConverter_Executing" Error="CommandConverter_Error" />
-    <toms:ConfirmedCommandConverter x:Key="CreateSnapshotCommandConverter" Executing="CreateSnapshotCommandConverter_Executing" Error="CommandConverter_Error" />
+        <toms:ConfirmedCommandConverter
+            x:Key="MepExportExcelCommandConverter"
+            Executing="MepExportExcelCommandConverter_Executing"
+            Error="CommandConverter_Error" />
+        <toms:ConfirmedCommandConverter x:Key="CreateSnapshotCommandConverter" Executing="CreateSnapshotCommandConverter_Executing" Error="CommandConverter_Error" />
     <toms:ConfirmedCommandConverter x:Key="LoadSnapshotCommandConverter" Executing="LoadSnapshotCommandConverter_Executing" Error="CommandConverter_Error" />
     <toms:ConfirmedCommandConverter x:Key="ErrorHandlerCommandConverter" Error="CommandConverter_Error" />
 
@@ -299,8 +303,7 @@
                             <MenuItem
                                 Header="{x:Static properties:Resources.MepExportExcelAll}"
                                 Style="{DynamicResource {x:Static styles:ResourceKeys.MenuItemStyle}}"
-                                Command="{Binding MepExportExcelCommand}" />
-                            <!--, Converter={StaticResource ExportExcelCommandConverter}}" />-->
+                                Command="{Binding MepExportExcelCommand, Converter={StaticResource MepExportExcelCommandConverter}}" />
 
                             <MenuItem
                                 Header="{x:Static properties:Resources.ExportExcelAll}"

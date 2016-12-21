@@ -14,10 +14,12 @@
     public static partial class ResourceEntityExtensions
     {
         private const string KeyColumnHeader = @"Key";
+        private const string MepKeyColumnHeader = @"ID";
         private const string CommentHeaderPrefix = "Comment";
         private const string ExcelCarriageReturn = "_x000D_";
 
         private static readonly string[] _fixedColumnHeaders = { KeyColumnHeader };
+        private static readonly string[] _mepFixedColumnHeaders = { MepKeyColumnHeader };
 
         /// <summary>
         /// Converts the entries into table with header line.
@@ -321,7 +323,7 @@
             if (headerColumns.Count < 2)
                 return false;
 
-            if (headerColumns[0] != KeyColumnHeader)
+            if ((headerColumns[0] != KeyColumnHeader) && (headerColumns[0] != MepKeyColumnHeader))
                 return false;
 
             var headerCultures = headerColumns
