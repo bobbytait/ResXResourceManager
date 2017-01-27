@@ -78,7 +78,7 @@
             {
             }
 
-            throw new InvalidOperationException("Error parsing language: " + cultureKeyName);
+            throw new InvalidOperationException("Error parsing language: " + cultureKeyName + "\n\nPlease verify proper column header names in the spreadsheet being imported.");
         }
 
         /// <summary>
