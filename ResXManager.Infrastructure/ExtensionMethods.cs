@@ -20,9 +20,61 @@
             {
                 cultureKeyName = cultureKeyName?.TrimStart('.');
 
+                // MEP: Our incoming spreadsheets often contain a more friendly language name. If we
+                // see any of those, we'll convert them to a Culture Name GetCultureInfo() can work
+                // with. For a list of those, see:
+                // https://www.microsoft.com/resources/msdn/goglobal/default.mspx
+
+                switch (cultureKeyName)
+                {
+                    case "English":
+                        cultureKeyName = String.Empty;
+                        break;
+
+                    case "German":
+                        cultureKeyName = "de-DE";
+                        break;
+
+                    case "Spanish":
+                        cultureKeyName = "es-ES";
+                        break;
+
+                    case "French":
+                        cultureKeyName = "fr-FR";
+                        break;
+
+                    case "Italian":
+                        cultureKeyName = "it-IT";
+                        break;
+
+                    case "Japanese":
+                        cultureKeyName = "ja-JP";
+                        break;
+
+                    case "Korean":
+                        cultureKeyName = "ko-KR";
+                        break;
+
+                    case "Dutch":
+                        cultureKeyName = "nl-NL";
+                        break;
+
+                    case "Portuguese":
+                        cultureKeyName = "pt-PT";
+                        break;
+
+                    case "Chinese (Simplified)":
+                        cultureKeyName = "zh-Hans";
+                        break;
+
+                    case "Chinese (Traditional)":
+                        cultureKeyName = "zh-Hant";
+                        break;
+                }
+
                 return string.IsNullOrEmpty(cultureKeyName) ? null : CultureInfo.GetCultureInfo(cultureKeyName);
             }
-            catch (ArgumentException)
+            catch (Exception)
             {
             }
 

@@ -29,8 +29,7 @@
 
     public static partial class ResourceEntityExtensions
     {
-        private static readonly string[] _singleSheetFixedColumnHeaders = { "Project", "File", "Key" };
-        private static readonly string[] _mepSingleSheetFixedColumnHeaders = { "ID" };
+        private static readonly string[] _singleSheetFixedColumnHeaders = { "Project", "File", "ID" };
 
         public static void ExportExcelFile([NotNull] this ResourceManager resourceManager, [NotNull] string filePath, IResourceScope scope, ExcelExportMode exportMode)
         {
@@ -51,10 +50,6 @@
                 else if (exportMode == ExcelExportMode.SingleSheet)
                 {
                     ExportToSingleSheet(workbookPart, scope ?? new FullScope(resourceManager.ResourceEntities));
-                }
-                else // (exportMode == ExcelExportMode.MEPSingleSheet)
-                {
-                    ExportToSingleSheet(workbookPart, new MEPScope(resourceManager.ResourceEntities));
                 }
             }
         }
@@ -91,16 +86,8 @@
             Contract.Requires(workbookPart != null);
             Contract.Requires(scope != null);
 
-            IEnumerable<CultureKey> languages;
-            if (scope is MEPScope)
-            {
-                languages = scope.Languages.Distinct().ToArray();
-            }
-            else
-            {
-                languages = scope.Languages.Concat(scope.Comments).Distinct().ToArray();
-            }
-
+            IEnumerable<CultureKey> languages = scope.Languages.Concat(scope.Comments).Distinct().ToArray();
+ 
             var entries = scope.Entries.ToArray();
             var sheet = new Sheet { Name = "ResXResourceManager", Id = "Id1", SheetId = 1 };
             workbookPart.Workbook = new Workbook().AppendItem(new Sheets(sheet));
@@ -109,18 +96,8 @@
             var worksheet = new Worksheet();
             worksheetPart.Worksheet = worksheet;
 
-            IEnumerable<string> headerRow;
-            IEnumerable<IEnumerable<string>> dataRows;
-            if (scope is MEPScope)
-            {
-                headerRow = _mepSingleSheetFixedColumnHeaders.Concat(languages.GetLanguageColumnHeaders(scope));
-                dataRows = entries.Select(e => e.GetDataRow(languages, scope));
-            }
-            else
-            {
-                headerRow = _singleSheetFixedColumnHeaders.Concat(languages.GetLanguageColumnHeaders(scope));
-                dataRows = entries.Select(e => new[] { e.Container.ProjectName, e.Container.UniqueName }.Concat(e.GetDataRow(languages, scope)));
-            }
+            IEnumerable<string> headerRow = _singleSheetFixedColumnHeaders.Concat(languages.GetLanguageColumnHeaders(scope));
+            IEnumerable<IEnumerable<string>> dataRows = entries.Select(e => new[] { e.Container.ProjectName, e.Container.UniqueName }.Concat(e.GetDataRow(languages, scope)));
 
             var rows = new[] { headerRow }.Concat(dataRows);
             worksheet.AppendItem(rows.Aggregate(new SheetData(), AppendRow));
@@ -404,25 +381,10 @@
         {
             Contract.Requires(language != null);
 
-            string cultureKeyName;
-            if (scope is MEPScope)
-            {
-                if (language.Culture == null)
-                {
-                    cultureKeyName = CultureInfo.CurrentCulture.DisplayName;
-                }
-                else
-                {
-                    cultureKeyName = language.Culture.DisplayName;
-                }
-            }
-            else
-            {
-                cultureKeyName = language.ToString();
+            string cultureKeyName = language.ToString();
 
-                if ((scope == null) || scope.Comments.Contains(language))
-                    yield return CommentHeaderPrefix + cultureKeyName;
-            }
+            if ((scope == null) || scope.Comments.Contains(language))
+                yield return CommentHeaderPrefix + cultureKeyName;
 
             if ((scope == null) || scope.Languages.Contains(language))
                 yield return cultureKeyName;
@@ -432,12 +394,6 @@
         {
             Contract.Requires(entry != null);
             Contract.Requires(language != null);
-
-            if (!(scope is MEPScope))
-            {
-                if ((scope == null) || scope.Comments.Contains(language))
-                    yield return entry.Comments.GetValue(language);
-            }
 
             if ((scope == null) || scope.Languages.Contains(language))
                 yield return entry.Values.GetValue(language);
@@ -457,11 +413,6 @@
             Contract.Requires(languages != null);
 
             var languageColumnHeaders = languages.GetLanguageColumnHeaders(scope);
-
-            if (scope is MEPScope)
-            {
-                yield return _mepFixedColumnHeaders.Concat(languageColumnHeaders);
-            }
 
             yield return _fixedColumnHeaders.Concat(languageColumnHeaders);
         }
@@ -698,31 +649,6 @@
             {
                 get;
             }
-        }
-
-        private class MEPScope : IResourceScope
-        {
-            public MEPScope([NotNull] ICollection<ResourceEntity> entities)
-            {
-                Contract.Requires(entities != null);
-
-                Entries = entities.SelectMany(entity => entity.Entries)
-                    .ToArray();
-
-                var languages = entities
-                    .SelectMany(entity => entity.Languages)
-                    .Select(l => l.CultureKey)
-                    .Distinct()
-                    .ToArray();
-
-                Languages = languages;
-            }
-
-            public IEnumerable<ResourceTableEntry> Entries { get; }
-
-            public IEnumerable<CultureKey> Languages { get; }
-
-            public IEnumerable<CultureKey> Comments { get { return null; } }
         }
     }
 }
