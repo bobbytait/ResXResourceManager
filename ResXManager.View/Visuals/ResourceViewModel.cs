@@ -186,12 +186,6 @@
         public ICommand PasteCommand => new DelegateCommand<DataGrid>(CanPaste, Paste);
 
         [NotNull]
-        public ICommand MepExportExcelCommand => new DelegateCommand<IExportParameters>(CanExportExcel, MepExportExcel);
-
-        [NotNull]
-        public ICommand MepImportExcelCommand => new DelegateCommand<string>(MepImportExcel);
-
-        [NotNull]
         public ICommand ExportExcelCommand => new DelegateCommand<IExportParameters>(CanExportExcel, ExportExcel);
 
         [NotNull]
@@ -423,25 +417,6 @@
             var scope = param.Scope;
 
             return (scope == null) || (scope.Entries.Any() && (scope.Languages.Any() || scope.Comments.Any()));
-        }
-
-        private void MepExportExcel([NotNull] IExportParameters param)
-        {
-            Contract.Requires(param != null);
-            Contract.Requires(param.FileName != null);
-
-            _resourceManager.ExportExcelFile(param.FileName, param.Scope, ExcelExportMode.MEPSingleSheet);
-        }
-
-        private void MepImportExcel([NotNull] string fileName)
-        {
-            Contract.Requires(fileName != null);
-
-            MessageBox.Show("MepImportExcel");
-
-            //var changes = _resourceManager.ImportExcelFile(fileName);
-
-            //changes.Apply();
         }
 
         private void ExportExcel([NotNull] IExportParameters param)

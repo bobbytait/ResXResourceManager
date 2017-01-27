@@ -136,11 +136,6 @@
             ExportExcelCommandConverter(DateTime.Today.ToString("yyyy_MM_dd", CultureInfo.InvariantCulture), e);
         }
 
-        private void MepExportExcelCommandConverter_Executing(object sender, [NotNull] ConfirmedCommandEventArgs e)
-        {
-            ExportExcelCommandConverter("TFL-Translations-RRM-Export-" + DateTime.Today.ToString("yyyyMMdd", CultureInfo.InvariantCulture), e);
-        }
-
         private void ExportExcelCommandConverter(string filename, [NotNull] ConfirmedCommandEventArgs e)
         {
             var dlg = new SaveFileDialog

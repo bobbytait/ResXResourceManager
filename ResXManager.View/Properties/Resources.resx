@@ -238,12 +238,6 @@ Do you want to add a new entry anyway?</value>
   <data name="ErrorAddingNewResourceFile" xml:space="preserve">
     <value>Error adding the new resource file '{0}'.</value>
   </data>
-  <data name="MepImportExcel" xml:space="preserve">
-    <value>MEP import</value>
-  </data>
-  <data name="MepExportExcelAll" xml:space="preserve">
-    <value>MEP export all</value>
-  </data>
   <data name="ExportExcelAll" xml:space="preserve">
     <value>Export all</value>
   </data>
