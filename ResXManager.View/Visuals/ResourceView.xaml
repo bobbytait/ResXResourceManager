@@ -551,6 +551,10 @@
                   <DataTrigger Binding="{Binding IsDuplicateKey}" Value="True">
                     <Setter Property="Background" Value="{StaticResource HighlightBrush}" />
                   </DataTrigger>
+                  <DataTrigger Binding="{Binding IsInvalidStringId}" Value="True">
+                    <Setter Property="Background" Value="{StaticResource HighlightBrush}" />
+                    <Setter Property="ToolTip" Value="{x:Static properties:Resources.InvalidStringIdError}" />
+                  </DataTrigger>
                   <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
                   </Trigger>

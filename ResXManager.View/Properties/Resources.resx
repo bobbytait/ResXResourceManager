@@ -280,6 +280,9 @@ Do you want to add a new entry anyway?</value>
   <data name="IndexColumnToolTip" xml:space="preserve">
     <value>Index of the entry in the resource file. Use fractional values to reorder the entries.</value>
   </data>
+  <data name="InvalidStringIdError" xml:space="preserve">
+    <value>Warning: Invalid string ID. Please remove whitespace.</value>
+  </data>
   <data name="Invariant" xml:space="preserve">
     <value>Invariant</value>
   </data>

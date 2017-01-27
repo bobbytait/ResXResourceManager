@@ -138,9 +138,10 @@
                     var entry = (ResourceTableEntry)row;
                     var values = visibleLanguages.Select(lang => entry.Values.GetValue(lang));
 
-                    return entry.IsDuplicateKey
-                           || (!entry.IsInvariant && (values.Any(string.IsNullOrEmpty) || entry.HasStringFormatParameterMismatches(visibleLanguages)))
-                           || entry.HasSnapshotDifferences(visibleLanguages);
+                    return entry.IsDuplicateKey ||
+                        entry.IsInvalidStringId ||
+                        (!entry.IsInvariant && (values.Any(string.IsNullOrEmpty) || entry.HasStringFormatParameterMismatches(visibleLanguages))) ||
+                        entry.HasSnapshotDifferences(visibleLanguages);
                 };
             }
             catch (InvalidOperationException)

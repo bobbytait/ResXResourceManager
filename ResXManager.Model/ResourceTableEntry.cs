@@ -347,6 +347,15 @@
             }
         }
 
+        [PropertyDependency(nameof(Key))]
+        public bool IsInvalidStringId
+        {
+            get
+            {
+                return (Key.Any(Char.IsWhiteSpace));
+            }
+        }
+
         public ReadOnlyCollection<CodeReference> CodeReferences
         {
             get

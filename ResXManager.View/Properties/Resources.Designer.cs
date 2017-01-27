@@ -602,6 +602,15 @@ namespace tomenglertde.ResXManager.View.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Warning: Invalid string ID. Please remove whitespace..
+        /// </summary>
+        public static string InvalidStringIdError {
+            get {
+                return ResourceManager.GetString("InvalidStringIdError", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Invariant.
         /// </summary>
         public static string Invariant {
@@ -1259,6 +1268,10 @@ namespace tomenglertde.ResXManager.View.Properties {
         ///   Looks up a localized string similar to Index of the entry in the resource file. Use fract....
         /// </summary>
         IndexColumnToolTip,
+        /// <summary>
+        ///   Warning: Invalid string ID. Please remove whitespace..
+        /// </summary>
+        InvalidStringIdError,
         /// <summary>
         ///   Looks up a localized string similar to Invariant.
         /// </summary>
