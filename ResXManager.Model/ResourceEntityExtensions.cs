@@ -325,21 +325,6 @@
             return changes;
         }
 
-        private static string ValidateStringId(string sourceId)
-        {
-            // MEP: For now, this function checks the incoming string for any whitespace, and throws
-            // an exception to halt the import on finding any. It could be modified to make the
-            // corrections automatically, but I thought it best (at least for today) to encourage a
-            // more-compliant source file.
-
-            if (sourceId.Any(Char.IsWhiteSpace))
-            {
-                throw new ImportException(string.Format("This string ID contained whitespace:\n{0}\n\nPlease correct the issue in the source file.\n\n{1}", sourceId, Resources.ImportFailedError));
-            }
-
-            return sourceId;
-        }
-
         private static string FixExcelCarriageReturn(string sourceString)
         {
             return ((sourceString != null) && (sourceString.Contains(ExcelCarriageReturn))) ?
