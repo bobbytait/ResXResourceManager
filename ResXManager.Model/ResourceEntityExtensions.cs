@@ -261,7 +261,7 @@
                 .SelectMany(mapping => mapping.TextColumns.Select((column, index) =>
                     new
                     {
-                        Key = ValidateStringId(mapping.Key),
+                        mapping.Key,
                         Entry = entity.Entries.SingleOrDefault(e => e.Key == mapping.Key) ?? entity.Add(mapping.Key),
                         Text = FixExcelCarriageReturn(column),
                         Culture = dataColumnHeaders[index].ExtractCulture(),
@@ -270,6 +270,51 @@
                 .Where(mapping => mapping.Entry != null)
                 .Select(mapping => new EntryChange(mapping.Entry, mapping.Text, mapping.Culture, mapping.ColumnKind, mapping.Entry.GetEntryData(mapping.Culture, mapping.ColumnKind)))
                 .ToArray();
+
+            // MEP: Find any invalid string IDs
+            List<string> importExceptions = new List<string>();
+            var badStringIds = table.Skip(1)
+                .Select(columns => new
+                {
+                    Key = columns[0]
+                })
+                .Where(g => g.Key.Contains(" "))
+                .Select(g => g.Key)
+                .ToArray();
+            if (badStringIds.Count() > 0)
+            {
+                foreach (var item in badStringIds)
+                {
+                    importExceptions.Add("\nWhitespace in string ID: " + item);
+                }
+            }
+
+            // MEP: Find any duplicate string IDs
+            var duplicateIds = table.Skip(1)
+                .Select(columns => new {
+                    Key = columns[0]
+                })
+                .GroupBy(p => p)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key);
+            if (duplicateIds.Count() > 0)
+            {
+                foreach (var item in duplicateIds)
+                {
+                    importExceptions.Add("\nDuplicate string ID: " + item.Key);
+                }
+            }
+
+            // MEP: Add details to import failed exception
+            if (importExceptions.Count > 0)
+            {
+                string exceptions = "";
+                foreach (string exception in importExceptions)
+                {
+                    exceptions += exception;
+                }
+                throw new ImportException(Resources.ImportFailedError + "\n" + exceptions);
+            }
 
             var changes = mappings
                 .Where(mapping => (mapping.OriginalText != mapping.Text) && !string.IsNullOrEmpty(mapping.Text))
