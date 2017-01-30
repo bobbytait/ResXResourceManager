@@ -17,6 +17,7 @@
         private const string KeyColumnHeader = @"ID";
         private const string CommentHeaderPrefix = "Comment";
         private const string ExcelCarriageReturn = "_x000D_";
+        private const string NonBreakingSpace = " "; // NOTE: This is a non-breaking space, not a standard space
 
         private static readonly string[] _fixedColumnHeaders = { KeyColumnHeader };
 
@@ -263,7 +264,7 @@
                     {
                         mapping.Key,
                         Entry = entity.Entries.SingleOrDefault(e => e.Key == mapping.Key) ?? entity.Add(mapping.Key),
-                        Text = FixExcelCarriageReturn(column),
+                        Text = ReplaceProblematicCharacters(column),
                         Culture = dataColumnHeaders[index].ExtractCulture(),
                         ColumnKind = dataColumnHeaders[index].GetColumnKind()
                     }))
@@ -325,11 +326,24 @@
             return changes;
         }
 
-        private static string FixExcelCarriageReturn(string sourceString)
+        private static string ReplaceProblematicCharacters(String sourceString)
         {
-            return ((sourceString != null) && (sourceString.Contains(ExcelCarriageReturn))) ?
-                sourceString.Replace(ExcelCarriageReturn, "\r") :
-                sourceString;
+            if (String.IsNullOrEmpty(sourceString) || String.IsNullOrWhiteSpace(sourceString))
+            {
+                return sourceString;
+            }
+
+            if (sourceString.Contains(ExcelCarriageReturn))
+            {
+                sourceString.Replace(ExcelCarriageReturn, "\r");
+            }
+
+            if (sourceString.Contains(NonBreakingSpace))
+            {
+                sourceString.Replace(NonBreakingSpace, " ");
+            }
+
+            return sourceString;
         }
 
         [NotNull]
