@@ -16,8 +16,8 @@
         //private const string KeyColumnHeader = @"Key"; // original code
         private const string KeyColumnHeader = @"ID";
         private const string CommentHeaderPrefix = "Comment";
-        private const string ExcelCarriageReturn = "_x000D_";
-        private const string NonBreakingSpace = " "; // NOTE: This is a non-breaking space, not a standard space
+        public const string ExcelCarriageReturn = "_x000D_";
+        public const string NonBreakingSpace = " "; // NOTE: This is a non-breaking space, not a standard space
 
         private static readonly string[] _fixedColumnHeaders = { KeyColumnHeader };
 

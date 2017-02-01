@@ -419,6 +419,40 @@
             OnPropertyChanged(nameof(Index));
         }
 
+        public bool HasBadCharacters([NotNull] IEnumerable<object> cultures)
+        {
+            Contract.Requires(cultures != null);
+
+
+            //cultures.
+
+            //IEnumerable<tomenglertde.ResXManager.Infrastructure.CultureKey> ck = cultures.Select(CultureKey.Parse);
+
+            //bool b = HasBadCharacters(cultures.Select(CultureKey.Parse).Select(lang => _values.GetValue(lang)));
+
+            //this.
+
+            ResourceLanguage rl;
+
+            CultureKey ck;
+
+            IEnumerable<object> value = cultures.Select(CultureKey.Parse).Select(lang =>
+            {
+                ck = lang;
+                return _values.GetValue(lang);
+            });
+
+            bool b = HasBadCharacters(ck, value);
+
+            return b;
+
+            //return HasBadCharacters(cultures.Select(CultureKey.Parse).Select(lang => _values.GetValue(lang)));
+
+            //return HasBadCharacters(cultures.Select(CultureKey.Parse), cultures.Select(CultureKey.Parse).Select(lang => _values.GetValue(lang)));
+
+            //([NotNull] ResourceLanguage language, params string[] values)
+        }
+
         public bool HasStringFormatParameterMismatches([NotNull] IEnumerable<object> cultures)
         {
             Contract.Requires(cultures != null);
@@ -462,9 +496,25 @@
         {
             Contract.Requires(language != null);
 
-            return GetStringFormatParameterMismatchAnnotations(language)
+            string[] warnings1 = GetStringFormatParameterMismatchAnnotations(language)
                 .Concat(GetSnapshotDifferences(language, Values.GetValue(language.CultureKey), d => d.Text))
                 .ToArray();
+
+            string[] warnings2 = GetBadCharacterAnnotations(language)
+                .Concat(GetSnapshotDifferences(language, Values.GetValue(language.CultureKey), d => d.Text))
+                .ToArray();
+            if (warnings2.Length > 0)
+            {
+                int y = 0;
+            }
+
+            string[] warnings = new string[warnings1.Length + warnings2.Length];
+            warnings1.CopyTo(warnings, 0);
+            warnings2.CopyTo(warnings, warnings1.Length);
+
+            ICollection<string> annotations = warnings;
+
+            return annotations;
         }
 
         [NotNull]
@@ -488,6 +538,93 @@
                 yield break;
 
             yield return string.Format(CultureInfo.CurrentCulture, Resources.SnapshotAnnotation, snapshotValue);
+        }
+
+        private IEnumerable<string> GetBadCharacterAnnotations([NotNull] ResourceLanguage language)
+        {
+            //if (language.IsNeutralLanguage)
+            //    yield break;
+
+            var value = language.GetValue(_key);
+            if (string.IsNullOrEmpty(value))
+                yield break;
+
+            var neutralValue = _neutralLanguage.GetValue(_key);
+            if (string.IsNullOrEmpty(neutralValue))
+                yield break;
+
+            //if (value.StartsWith("SEE"))
+            //{
+            //    int b = 0;
+            //}
+
+            //bool isHbc = HasBadCharacters(language, neutralValue, value);
+
+            if (HasBadCharacters(language, neutralValue, value))
+                yield return "Has bad characters";//Resources.XXXXXXXXXXXXX;
+        }
+
+        private static bool HasBadCharacters(ResourceLanguage language, [NotNull] params string[] values)
+        {
+            Contract.Requires(values != null);
+
+            return HasBadCharacters(language, (IEnumerable<string>)values);
+        }
+
+        private static bool HasBadCharacters(ResourceLanguage language, [NotNull] IEnumerable<string> values)
+        {
+            Contract.Requires(values != null);
+
+            values = values.Where(value => !string.IsNullOrEmpty(value)).ToArray();
+
+            if (!values.Any())
+                return false;
+
+            string translatedValue = values.ElementAt(1);
+            if (translatedValue.Contains(ResourceEntityExtensions.ExcelCarriageReturn))
+            {
+                return true;
+            }
+
+            // Here's where things get a little stickier:
+            //
+            // Basically, there are [French] punctuation marks that always require a non-
+            // breaking space, in both Canadian French and standard French. These include the
+            // colon (:) and the French quotation marks. The opening French quotation mark («)
+            // is followed by a non-breaking space, and the closing French quotation mark (») is
+            // preceded by a non-breaking space.
+            //
+            // And then there are punctuation marks that require a non-breaking space in
+            // standard French, but not in Canadian French. These include the exclamation mark
+            // (!), the question mark (?), and the semi - colon (;).
+
+            if (translatedValue.Contains(ResourceEntityExtensions.NonBreakingSpace))
+            {
+                // If it's any kind of French language, apply the standard French rules for now
+                if ((language.Culture != null) && (language.Culture.Parent.Name == "fr"))
+                {
+                    int i = translatedValue.IndexOf(ResourceEntityExtensions.NonBreakingSpace, 0);
+                    while (i != -1)
+                    {
+                        char prev = (i == 0) ? (char)0 : translatedValue[i - 1];
+                        char next = (i >= translatedValue.Length - 1) ? (char)0 : translatedValue[i + 1];
+
+                        if ((next != ':') && (next != '»') && (next != '!') &&
+                            (next != '?') && (next != ';') && (prev != '«'))
+                        {
+                            return true;
+                        }
+
+                        i = translatedValue.IndexOf(ResourceEntityExtensions.NonBreakingSpace, i + 1);
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private IEnumerable<string> GetStringFormatParameterMismatchAnnotations([NotNull] ResourceLanguage language)
