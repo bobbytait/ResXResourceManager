@@ -3,12 +3,15 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Data.Entity;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Linq;
     using System.Text.RegularExpressions;
+
+    //using Microsoft.Practices.Prism;
 
     using JetBrains.Annotations;
 
@@ -419,27 +422,28 @@
             OnPropertyChanged(nameof(Index));
         }
 
+        private static int _badCharacterCheckFrenchIndex = -1;
+        public static void ResetBadCharacterCheckFrenchIndex()
+        {
+            _badCharacterCheckFrenchIndex = -1;
+        }
+
         public bool HasBadCharacters([NotNull] IEnumerable<object> cultures)
         {
             Contract.Requires(cultures != null);
 
+            //foreach (var x in cultures.Select((Value, Index) => new { Value, Index }))
+            //{
+            //    if (((CultureKey)x.Value).Culture.Name.StartsWith("fr-"))
+            //    {
+            //        _badCharacterCheckFrenchIndex = x.Index;
+            //        break;
+            //    }
+            //}
 
-            IEnumerable<string> values = cultures.Select(CultureKey.Parse).Select(lang => _values.GetValue(lang));
+            //IEnumerable<string> values = cultures.Select(CultureKey.Parse).Select(lang => _values.GetValue(lang));
 
-
-            CultureKey ck = CultureKey.Parse(cultures);
-
-
-            // TODO: Check out LINQ .Select
-
-
-
-
-
-            //CultureKey cultureKey = cultures.Select(CultureKey.Parse).Select;
-
-
-            return HasBadCharacters(values);
+            return HasBadCharacters(false, cultures.Select(CultureKey.Parse).Select(lang => _values.GetValue(lang)));
         }
 
         public bool HasStringFormatParameterMismatches([NotNull] IEnumerable<object> cultures)
@@ -531,9 +535,6 @@
 
         private IEnumerable<string> GetBadCharacterAnnotations([NotNull] ResourceLanguage language)
         {
-            //if (language.IsNeutralLanguage)
-            //    yield break;
-
             var value = language.GetValue(_key);
             if (string.IsNullOrEmpty(value))
                 yield break;
@@ -542,26 +543,38 @@
             if (string.IsNullOrEmpty(neutralValue))
                 yield break;
 
-            //if (value.StartsWith("SEE"))
-            //{
-            //    int b = 0;
-            //}
+            bool isFrench = language.IsNeutralLanguage ?
+                CultureInfo.CurrentCulture.Name.StartsWith("fr-") :
+                language.Culture.Name.StartsWith("fr-");
 
-            //bool isHbc = HasBadCharacters(language, neutralValue, value);
-
-            if (HasBadCharacters(neutralValue, value))
-                yield return "Has bad characters";//Resources.XXXXXXXXXXXXX;
+            if (HasBadCharacters(isFrench, neutralValue, value))
+                yield return "Has bad characters";//Resources.XXXXXXXXXXXXX; // TODO: Make this a resource string
         }
 
-        private static bool HasBadCharacters([NotNull] params string[] values)
+        private static bool HasBadCharacters(bool isFrench, [NotNull] params string[] values)
         {
             Contract.Requires(values != null);
 
-            return HasBadCharacters((IEnumerable<string>)values);
+            return HasBadCharacters(isFrench, (IEnumerable<string>)values);
         }
 
-        private static bool HasBadCharacters([NotNull] IEnumerable<string> values)
+        private static bool HasBadCharacters(bool isFrench, [NotNull] IEnumerable<string> values)
         {
+            /*
+                    private static bool HasStringFormatParameterMismatches([NotNull] IEnumerable<string> values)
+                    {
+                        Contract.Requires(values != null);
+
+                        values = values.Where(value => !string.IsNullOrEmpty(value)).ToArray();
+
+                        if (!values.Any())
+                            return false;
+
+                        return values.Select(GetStringFormatFlags)
+                            .Distinct()
+                            .Count() > 1;
+                    }
+            */
             Contract.Requires(values != null);
 
             values = values.Where(value => !string.IsNullOrEmpty(value)).ToArray();
@@ -569,11 +582,40 @@
             if (!values.Any())
                 return false;
 
-            string translatedValue = values.ElementAt(1);
-            if (translatedValue.Contains(ResourceEntityExtensions.ExcelCarriageReturn))
+
+            //return values.Select(GetStringFormatFlags).Distinct().Count() > 1;
+
+            //IEnumerable<bool> rvs = values.Select(x => ((x.Contains(ResourceEntityExtensions.ExcelCarriageReturn) || ContainsBadHardSpace(true, x))));
+
+            //foreach (var value in values)
+            //{
+            //    bool c = value.Contains(ResourceEntityExtensions.ExcelCarriageReturn) || ContainsBadHardSpace(true, value);
+            //}
+
+            //bool b = 
+
+            IEnumerable<bool> b = values.ElementAt(1).Select(v => ContainsBadHardSpace(v));
+
+            // TODO:  2 for normal view; 11 for other
+
+
+            return true;//values.Select(v => ContainsBadHardSpace(v));
+
+            //value => value.Contains(ResourceEntityExtensions.ExcelCarriageReturn) || ContainsBadHardSpace(true, value));
+
+        }
+
+        private static bool ContainsBadHardSpace(/*bool isFrench,*/ string value)
+        {
+            if (!value.Contains(ResourceEntityExtensions.NonBreakingSpace))
             {
-                return true;
+                return false;
             }
+
+            //if (!isFrench)
+            //{
+            //    return true;
+            //}
 
             // Here's where things get a little stickier:
             //
@@ -587,30 +629,22 @@
             // standard French, but not in Canadian French. These include the exclamation mark
             // (!), the question mark (?), and the semi - colon (;).
 
-            if (translatedValue.Contains(ResourceEntityExtensions.NonBreakingSpace))
+            // If it's any kind of French language, apply the standard French rules for now
+            // TODO: Perhaps later we can apply the various rules for the French sub-languages
+
+            int i = value.IndexOf(ResourceEntityExtensions.NonBreakingSpace, 0);
+            while (i != -1)
             {
-                // If it's any kind of French language, apply the standard French rules for now
-                //if ((language.Culture != null) && (language.Culture.Parent.Name == "fr"))
-                //{
-                    int i = translatedValue.IndexOf(ResourceEntityExtensions.NonBreakingSpace, 0);
-                    while (i != -1)
-                    {
-                        char prev = (i == 0) ? (char)0 : translatedValue[i - 1];
-                        char next = (i >= translatedValue.Length - 1) ? (char)0 : translatedValue[i + 1];
+                char prev = (i == 0) ? (char)0 : value[i - 1];
+                char next = (i >= value.Length - 1) ? (char)0 : value[i + 1];
 
-                        if ((next != ':') && (next != '»') && (next != '!') &&
-                            (next != '?') && (next != ';') && (prev != '«'))
-                        {
-                            return true;
-                        }
-
-                        i = translatedValue.IndexOf(ResourceEntityExtensions.NonBreakingSpace, i + 1);
-                    }
-                //}
-                //else
-                //{
+                if ((next != ':') && (next != '»') && (next != '!') &&
+                    (next != '?') && (next != ';') && (prev != '«'))
+                {
                     return true;
-                //}
+                }
+
+                i = value.IndexOf(ResourceEntityExtensions.NonBreakingSpace, i + 1);
             }
 
             return false;
