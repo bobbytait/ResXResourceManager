@@ -140,7 +140,9 @@
 
                     return entry.IsDuplicateKey ||
                         entry.IsInvalidStringId ||
-                        (!entry.IsInvariant && (values.Any(string.IsNullOrEmpty) || entry.HasBadCharacters(visibleLanguages) || entry.HasStringFormatParameterMismatches(visibleLanguages))) ||
+                        (!entry.IsInvariant && (values.Any(string.IsNullOrEmpty) ||
+                            entry.HasBadCharacters(visibleLanguages) ||
+                            entry.HasStringFormatParameterMismatches(visibleLanguages))) ||
                         entry.HasSnapshotDifferences(visibleLanguages);
                 };
             }

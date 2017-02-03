@@ -424,33 +424,22 @@
             Contract.Requires(cultures != null);
 
 
-            //cultures.
+            IEnumerable<string> values = cultures.Select(CultureKey.Parse).Select(lang => _values.GetValue(lang));
 
-            //IEnumerable<tomenglertde.ResXManager.Infrastructure.CultureKey> ck = cultures.Select(CultureKey.Parse);
 
-            //bool b = HasBadCharacters(cultures.Select(CultureKey.Parse).Select(lang => _values.GetValue(lang)));
+            CultureKey ck = CultureKey.Parse(cultures);
 
-            //this.
 
-            ResourceLanguage rl;
+            // TODO: Check out LINQ .Select
 
-            CultureKey ck;
 
-            IEnumerable<object> value = cultures.Select(CultureKey.Parse).Select(lang =>
-            {
-                ck = lang;
-                return _values.GetValue(lang);
-            });
 
-            bool b = HasBadCharacters(ck, value);
 
-            return b;
 
-            //return HasBadCharacters(cultures.Select(CultureKey.Parse).Select(lang => _values.GetValue(lang)));
+            //CultureKey cultureKey = cultures.Select(CultureKey.Parse).Select;
 
-            //return HasBadCharacters(cultures.Select(CultureKey.Parse), cultures.Select(CultureKey.Parse).Select(lang => _values.GetValue(lang)));
 
-            //([NotNull] ResourceLanguage language, params string[] values)
+            return HasBadCharacters(values);
         }
 
         public bool HasStringFormatParameterMismatches([NotNull] IEnumerable<object> cultures)
@@ -560,18 +549,18 @@
 
             //bool isHbc = HasBadCharacters(language, neutralValue, value);
 
-            if (HasBadCharacters(language, neutralValue, value))
+            if (HasBadCharacters(neutralValue, value))
                 yield return "Has bad characters";//Resources.XXXXXXXXXXXXX;
         }
 
-        private static bool HasBadCharacters(ResourceLanguage language, [NotNull] params string[] values)
+        private static bool HasBadCharacters([NotNull] params string[] values)
         {
             Contract.Requires(values != null);
 
-            return HasBadCharacters(language, (IEnumerable<string>)values);
+            return HasBadCharacters((IEnumerable<string>)values);
         }
 
-        private static bool HasBadCharacters(ResourceLanguage language, [NotNull] IEnumerable<string> values)
+        private static bool HasBadCharacters([NotNull] IEnumerable<string> values)
         {
             Contract.Requires(values != null);
 
@@ -601,8 +590,8 @@
             if (translatedValue.Contains(ResourceEntityExtensions.NonBreakingSpace))
             {
                 // If it's any kind of French language, apply the standard French rules for now
-                if ((language.Culture != null) && (language.Culture.Parent.Name == "fr"))
-                {
+                //if ((language.Culture != null) && (language.Culture.Parent.Name == "fr"))
+                //{
                     int i = translatedValue.IndexOf(ResourceEntityExtensions.NonBreakingSpace, 0);
                     while (i != -1)
                     {
@@ -617,11 +606,11 @@
 
                         i = translatedValue.IndexOf(ResourceEntityExtensions.NonBreakingSpace, i + 1);
                     }
-                }
-                else
-                {
+                //}
+                //else
+                //{
                     return true;
-                }
+                //}
             }
 
             return false;
