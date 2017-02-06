@@ -63,6 +63,24 @@
             return _getter(language);
         }
 
+        public CultureAndValue<T> GetLanguageAndValue(object culture)
+        {
+            var cultureKey = CultureKey.Parse(culture);
+
+            ResourceLanguage language;
+
+            if (!_languages.TryGetValue(cultureKey, out language))
+            {
+                return default(CultureAndValue<T>);
+            }
+
+            Contract.Assume(language != null);
+
+            T value = _getter(language);
+
+            return new CultureAndValue<T>(cultureKey.Culture, value);
+        }
+
         public bool SetValue(object culture, T value)
         {
             var cultureKey = CultureKey.Parse(culture);
@@ -104,6 +122,19 @@
             Contract.Invariant(_languages != null);
             Contract.Invariant(_getter != null);
             Contract.Invariant(_setter != null);
+        }
+    }
+
+    public class CultureAndValue<T>
+    {
+        public CultureInfo CultureInfo { get; set; }
+
+        public T Value { get; set; }
+
+        public CultureAndValue(CultureInfo cultureInfo, T value)
+        {
+            CultureInfo = cultureInfo;
+            Value = value;
         }
     }
 }

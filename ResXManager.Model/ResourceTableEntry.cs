@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Data.Entity;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Diagnostics.Contracts;
@@ -432,18 +431,7 @@
         {
             Contract.Requires(cultures != null);
 
-            //foreach (var x in cultures.Select((Value, Index) => new { Value, Index }))
-            //{
-            //    if (((CultureKey)x.Value).Culture.Name.StartsWith("fr-"))
-            //    {
-            //        _badCharacterCheckFrenchIndex = x.Index;
-            //        break;
-            //    }
-            //}
-
-            //IEnumerable<string> values = cultures.Select(CultureKey.Parse).Select(lang => _values.GetValue(lang));
-
-            return HasBadCharacters(false, cultures.Select(CultureKey.Parse).Select(lang => _values.GetValue(lang)));
+            return HasBadCharacters(cultures.Select(CultureKey.Parse).Select(lang => _values.GetLanguageAndValue(lang)));
         }
 
         public bool HasStringFormatParameterMismatches([NotNull] IEnumerable<object> cultures)
@@ -543,108 +531,87 @@
             if (string.IsNullOrEmpty(neutralValue))
                 yield break;
 
-            bool isFrench = language.IsNeutralLanguage ?
-                CultureInfo.CurrentCulture.Name.StartsWith("fr-") :
-                language.Culture.Name.StartsWith("fr-");
-
-            if (HasBadCharacters(isFrench, neutralValue, value))
-                yield return "Has bad characters";//Resources.XXXXXXXXXXXXX; // TODO: Make this a resource string
+            if (HasBadCharacters(new CultureAndValue<string>(language.Culture, value)))
+                yield return Resources.StringHasBadCharacterError;
         }
 
-        private static bool HasBadCharacters(bool isFrench, [NotNull] params string[] values)
+        private static bool HasBadCharacters([NotNull] params CultureAndValue<string>[] values)
         {
             Contract.Requires(values != null);
 
-            return HasBadCharacters(isFrench, (IEnumerable<string>)values);
+            return HasBadCharacters((IEnumerable<CultureAndValue<string>>) values);
         }
 
-        private static bool HasBadCharacters(bool isFrench, [NotNull] IEnumerable<string> values)
+        private static bool HasBadCharacters([NotNull] IEnumerable<CultureAndValue<string>> values)
         {
-            /*
-                    private static bool HasStringFormatParameterMismatches([NotNull] IEnumerable<string> values)
-                    {
-                        Contract.Requires(values != null);
-
-                        values = values.Where(value => !string.IsNullOrEmpty(value)).ToArray();
-
-                        if (!values.Any())
-                            return false;
-
-                        return values.Select(GetStringFormatFlags)
-                            .Distinct()
-                            .Count() > 1;
-                    }
-            */
             Contract.Requires(values != null);
 
-            values = values.Where(value => !string.IsNullOrEmpty(value)).ToArray();
-
+            values = values.Where(value => !string.IsNullOrEmpty(value.Value)).ToArray();
             if (!values.Any())
-                return false;
-
-
-            //return values.Select(GetStringFormatFlags).Distinct().Count() > 1;
-
-            //IEnumerable<bool> rvs = values.Select(x => ((x.Contains(ResourceEntityExtensions.ExcelCarriageReturn) || ContainsBadHardSpace(true, x))));
-
-            //foreach (var value in values)
-            //{
-            //    bool c = value.Contains(ResourceEntityExtensions.ExcelCarriageReturn) || ContainsBadHardSpace(true, value);
-            //}
-
-            //bool b = 
-
-            IEnumerable<bool> b = values.ElementAt(1).Select(v => ContainsBadHardSpace(v));
-
-            // TODO:  2 for normal view; 11 for other
-
-
-            return true;//values.Select(v => ContainsBadHardSpace(v));
-
-            //value => value.Contains(ResourceEntityExtensions.ExcelCarriageReturn) || ContainsBadHardSpace(true, value));
-
-        }
-
-        private static bool ContainsBadHardSpace(/*bool isFrench,*/ string value)
-        {
-            if (!value.Contains(ResourceEntityExtensions.NonBreakingSpace))
             {
                 return false;
             }
 
-            //if (!isFrench)
-            //{
-            //    return true;
-            //}
+            return (values.Select(ContainsExcelCarriageReturn).Contains(true) ||
+                values.Select(ContainsBadHardSpace).Contains(true));
+        }
+
+        private static bool ContainsExcelCarriageReturn(CultureAndValue<string> value)
+        {
+            return value.Value.Contains(ResourceEntityExtensions.ExcelCarriageReturn);
+        }
+
+        private static bool ContainsBadHardSpace(CultureAndValue<string> value)
+        {
+            if (!value.Value.Contains(ResourceEntityExtensions.NonBreakingSpace))
+            {
+                return false;
+            }
 
             // Here's where things get a little stickier:
             //
-            // Basically, there are [French] punctuation marks that always require a non-
-            // breaking space, in both Canadian French and standard French. These include the
-            // colon (:) and the French quotation marks. The opening French quotation mark («)
-            // is followed by a non-breaking space, and the closing French quotation mark (») is
-            // preceded by a non-breaking space.
+            // "Basically, there are French punctuation marks that always require a non-breaking
+            // space, in both Canadian French and standard French. These include the colon (:) and
+            // the French quotation marks. The opening French quotation mark («) is followed by a
+            // non-breaking space, and the closing French quotation mark (») is preceded by a non-
+            // breaking space.
             //
-            // And then there are punctuation marks that require a non-breaking space in
-            // standard French, but not in Canadian French. These include the exclamation mark
-            // (!), the question mark (?), and the semi - colon (;).
-
-            // If it's any kind of French language, apply the standard French rules for now
+            // "And then there are punctuation marks that require a non-breaking space in standard
+            // French, but not in Canadian French. These include the exclamation mark (!), the
+            // question mark (?), and the semi - colon (;)."
+            //
+            // In our case, at least for now, if it's any kind of French language, apply the
+            // standard French rules.
+            //
             // TODO: Perhaps later we can apply the various rules for the French sub-languages
 
-            int i = value.IndexOf(ResourceEntityExtensions.NonBreakingSpace, 0);
+            // If we are looking at the neutral language string and it is not French, we have a bad hard space
+            if ((value.CultureInfo == null) && (CultureInfo.CurrentCulture.Parent.Name != "fr"))
+            {
+                return true;
+            }
+
+            // If we are not looking at the neutral language string and it is not French, we have a bad hard space
+            if ((value.CultureInfo != null) && (value.CultureInfo.Parent.Name != "fr"))
+            {
+                return true;
+            }
+
+            // If we got here, we are processing a French string
+            int i = value.Value.IndexOf(ResourceEntityExtensions.NonBreakingSpace, 0);
             while (i != -1)
             {
-                char prev = (i == 0) ? (char)0 : value[i - 1];
-                char next = (i >= value.Length - 1) ? (char)0 : value[i + 1];
+                char prev = (i == 0) ? (char)0 : value.Value[i - 1];
+                char next = (i >= value.Value.Length - 1) ? (char)0 : value.Value[i + 1];
 
                 if ((next != ':') && (next != '»') && (next != '!') &&
                     (next != '?') && (next != ';') && (prev != '«'))
                 {
+                    // If we got here, the rules weren't followed; we have a bad hard space
                     return true;
                 }
 
-                i = value.IndexOf(ResourceEntityExtensions.NonBreakingSpace, i + 1);
+                i = value.Value.IndexOf(ResourceEntityExtensions.NonBreakingSpace, i + 1);
             }
 
             return false;

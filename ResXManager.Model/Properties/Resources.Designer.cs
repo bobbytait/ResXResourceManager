@@ -290,6 +290,18 @@ namespace tomenglertde.ResXManager.Model.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Warning: This item contains one or more characters....
+        /// </summary>
+        public static string StringHasBadCharacterError
+        {
+            get
+            {
+                Contract.Ensures(Contract.Result<string>() != null);
+                return ResourceManager.GetString("StringHasBadCharacterError", resourceCulture) ?? string.Empty;
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to ResX Resource Manager.
         /// </summary>
         /// <remarks>
@@ -398,6 +410,7 @@ namespace tomenglertde.ResXManager.Model.Properties {
         /// <summary>
         ///   Looks up a localized string similar to ResX Resource Manager.
         /// </summary>
+        StringHasBadCharacterError,
         /// <remarks>
         /// @Invariant
         /// </remarks>

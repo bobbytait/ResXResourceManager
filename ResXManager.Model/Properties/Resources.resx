@@ -176,6 +176,9 @@
   <data name="StringFormatParameterMismatchError" xml:space="preserve">
     <value>Warning: This item contains string format parameter mismatches!</value>
   </data>
+  <data name="StringHasBadCharacterError" xml:space="preserve">
+    <value>Warning: This item contains one or more characters that may break the code!</value>
+  </data>
   <data name="DuplicateKeyHandling_Fail" xml:space="preserve">
     <value>Show an error message and don't load the resource</value>
   </data>
