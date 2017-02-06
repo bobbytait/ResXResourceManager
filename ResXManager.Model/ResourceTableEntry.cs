@@ -421,12 +421,6 @@
             OnPropertyChanged(nameof(Index));
         }
 
-        private static int _badCharacterCheckFrenchIndex = -1;
-        public static void ResetBadCharacterCheckFrenchIndex()
-        {
-            _badCharacterCheckFrenchIndex = -1;
-        }
-
         public bool HasBadCharacters([NotNull] IEnumerable<object> cultures)
         {
             Contract.Requires(cultures != null);
@@ -484,10 +478,6 @@
             string[] warnings2 = GetBadCharacterAnnotations(language)
                 .Concat(GetSnapshotDifferences(language, Values.GetValue(language.CultureKey), d => d.Text))
                 .ToArray();
-            if (warnings2.Length > 0)
-            {
-                int y = 0;
-            }
 
             string[] warnings = new string[warnings1.Length + warnings2.Length];
             warnings1.CopyTo(warnings, 0);

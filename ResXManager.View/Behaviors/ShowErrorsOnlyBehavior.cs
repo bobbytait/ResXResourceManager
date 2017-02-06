@@ -124,8 +124,6 @@
                     return;
                 }
 
-                ResourceTableEntry.ResetBadCharacterCheckFrenchIndex();
-
                 var visibleLanguages = dataGrid.Columns
                     .Where(column => column.Visibility == Visibility.Visible)
                     .Select(column => column.Header)
