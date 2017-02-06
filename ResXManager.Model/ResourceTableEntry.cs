@@ -587,24 +587,7 @@
                 return true;
             }
 
-            // If we got here, we are processing a French string
-            int i = value.Value.IndexOf(ResourceEntityExtensions.NonBreakingSpace, 0);
-            while (i != -1)
-            {
-                char prev = (i == 0) ? (char)0 : value.Value[i - 1];
-                char next = (i >= value.Value.Length - 1) ? (char)0 : value.Value[i + 1];
-
-                if ((next != ':') && (next != '»') && (next != '!') &&
-                    (next != '?') && (next != ';') && (prev != '«'))
-                {
-                    // If we got here, the rules weren't followed; we have a bad hard space
-                    return true;
-                }
-
-                i = value.Value.IndexOf(ResourceEntityExtensions.NonBreakingSpace, i + 1);
-            }
-
-            return false;
+            return (ResourceEntityExtensions.GetBadFrenchHardSpaceIndices(value.Value) != null);
         }
 
         private IEnumerable<string> GetStringFormatParameterMismatchAnnotations([NotNull] ResourceLanguage language)

@@ -17,6 +17,7 @@
         private const string KeyColumnHeader = @"ID";
         private const string CommentHeaderPrefix = "Comment";
         public const string ExcelCarriageReturn = "_x000D_";
+        public const string ExcelLineFeed = "_x000A_";
         public const string NonBreakingSpace = " "; // NOTE: This is a non-breaking space, not a standard space
 
         private static readonly string[] _fixedColumnHeaders = { KeyColumnHeader };
@@ -264,7 +265,7 @@
                     {
                         mapping.Key,
                         Entry = entity.Entries.SingleOrDefault(e => e.Key == mapping.Key) ?? entity.Add(mapping.Key),
-                        Text = ReplaceProblematicCharacters(column),
+                        Text = ReplaceProblematicCharacters(column, dataColumnHeaders[index].ExtractCulture()),
                         Culture = dataColumnHeaders[index].ExtractCulture(),
                         ColumnKind = dataColumnHeaders[index].GetColumnKind()
                     }))
@@ -326,7 +327,7 @@
             return changes;
         }
 
-        private static string ReplaceProblematicCharacters(String sourceString)
+        private static string ReplaceProblematicCharacters(String sourceString, CultureInfo culture)
         {
             if (String.IsNullOrEmpty(sourceString) || String.IsNullOrWhiteSpace(sourceString))
             {
@@ -340,10 +341,63 @@
 
             if (sourceString.Contains(NonBreakingSpace))
             {
-                sourceString.Replace(NonBreakingSpace, " ");
+                // Treating all French languages as standard French for now; we can account for
+                // different rules in different sub-languages later on
+                if (culture.Parent.Name == "fr")
+                {
+                    int[] instances = GetBadFrenchHardSpaceIndices(sourceString);
+                    if (instances != null)
+                    {
+
+                        char[] characters = sourceString.ToCharArray();
+                        foreach (int i in instances)
+                        {
+                            characters[i] = ' ';
+                        }
+                        sourceString = String.Join("", characters);
+                    }
+                }
+                else
+                {
+                    sourceString.Replace(NonBreakingSpace, " ");
+                }
             }
 
             return sourceString;
+        }
+
+        public static int[] GetBadFrenchHardSpaceIndices(String sourceString)
+        {
+            if (String.IsNullOrEmpty(sourceString) || String.IsNullOrWhiteSpace(sourceString))
+            {
+                return null;
+            }
+
+            List<int> i = null;
+
+            int c = sourceString.IndexOf(ResourceEntityExtensions.NonBreakingSpace, 0);
+            while (c != -1)
+            {
+                char prev = (c == 0) ? (char)0 : sourceString[c - 1];
+                char next = (c >= sourceString.Length - 1) ? (char)0 : sourceString[c + 1];
+
+                if ((next != ':') && (next != '»') && (next != '!') &&
+                    (next != '?') && (next != ';') && (prev != '«'))
+                {
+                    // If we got here, the rules weren't followed; we have a bad hard space
+
+                    if (i == null)
+                    {
+                        i = new List<int>();
+                    }
+
+                    i.Add(c);
+                }
+
+                c = sourceString.IndexOf(ResourceEntityExtensions.NonBreakingSpace, c + 1);
+            }
+
+            return i?.ToArray();
         }
 
         [NotNull]
